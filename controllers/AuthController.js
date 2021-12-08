@@ -36,27 +36,33 @@ const login = (req, res, next) => {
 
     User.findOne({$or: [{email}]})
         .then(user => {
-            if(user){
+            if (user) {
                 bcrypt.compare(password, user.password, function (err, result) {
-                    if(err){
+                    if (err) {
                         res.json({
                             error: err
                         })
                     }
 
-                    if(result){
-                        let token = jwt.sign({name:user.name}, process.env.JWT_SECRET_KEY, {expiresIn: '1h'})
+                    if (result) {
+                        let token = jwt.sign({
+                                id: user.id,
+                                email: user.email,
+                                name: user.name,
+                                role_id: user.role_id,
+                            }, process.env.JWT_SECRET_KEY, {expiresIn: '72h'})
+
                         res.json({
                             message: "Вход выполнен успешно",
                             token
                         })
-                    }else{
+                    } else {
                         res.json({
                             message: 'Пароль не соответствует'
                         })
                     }
                 })
-            }else{
+            } else {
                 res.json({
                     message: "Пользователь не найден!"
                 })
@@ -65,23 +71,20 @@ const login = (req, res, next) => {
 }
 
 const user = (req, res, next) => {
-    let userID = req.body.id
+    res.json({
+        user: req.user
+    })
+}
 
-    User.findById(userID)
-        .then(response => {
-            res.json({
-                response
-            })
-        })
-        .catch(error => {
-            res.json({
-                message: error
-            })
-        })
+const logout =  (req, res) => {
+    return res.status(200).json({
+        message: 'Успешный выход из системы'
+    });
 }
 
 module.exports = {
     register,
     login,
+    logout,
     user
 }

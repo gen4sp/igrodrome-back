@@ -46,7 +46,7 @@ const store = (req, res, next) => {
             name: req.body.name,
             email: req.body.email,
             password: hashedPass,
-            role: req.body.role
+            role_id: req.body.role_id
         })
 
         user.save()
@@ -70,7 +70,7 @@ const update = (req, res, next) => {
     let updateData = {
         name: req.body.name,
         email: req.body.email,
-        role: req.body.role
+        role_id: req.body.role_id
     }
 
     if(req.body.password){
