@@ -37,9 +37,9 @@ const store = (req, res, next) => {
 
     let game = new Game({
         title: req.body.title,
-        isVisible: req.body.isVisible,
-        creatorId: req.body.creatorId,
-        ownerId: req.body.ownerId,
+        status: req.body.status,
+        creator_id: req.body.creator_id,
+        owner_id: req.body.owner_id,
     })
 
     if(req.file){
@@ -69,9 +69,9 @@ const update = (req, res, next) => {
 
     let updateData = {
         title: req.body.title,
-        isVisible: req.body.isVisible,
-        creatorId: req.body.creatorId,
-        ownerId: req.body.ownerId,
+        status: req.body.status,
+        creator_id: req.body.creator_id,
+        owner_id: req.body.owner_id,
     }
 
     if(req.file){

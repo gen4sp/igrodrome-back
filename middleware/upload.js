@@ -14,7 +14,7 @@ let storage = multer.diskStorage({
 let upload = multer({
     storage: storage,
     fileFilter: function (req, file, callback) {
-        if(file.mimetype === 'application/zip'){
+        if(file.mimetype === 'application/x-zip-compressed'){
             callback(null, true)
         }else{
             callback(null, false)

@@ -66,6 +66,7 @@ const store = (req, res, next) => {
 // Update
 const update = (req, res, next) => {
     let userID = req.body.id
+    console.log(userID)
 
     let updateData = {
         name: req.body.name,
