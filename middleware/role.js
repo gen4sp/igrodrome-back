@@ -8,8 +8,11 @@ const role = (rolesArray) => (req, res, next) => {
     }
     let authorized = false;
 
-    rolesArray.forEach(role => {
-        authorized = req.user.role_id === role;
+    rolesArray.some(role => {
+        if(req.user.role_id === role){
+            authorized = 1
+            return
+        }
     })
     if(authorized) {
         return next();

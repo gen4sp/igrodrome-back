@@ -1,17 +1,63 @@
 const Game = require('../models/Game')
+const fs = require('fs')
+const path = require('path')
+const unzipper = require('unzipper')
 
-// All games
-const index = (req, res, next) => {
-    Game.find()
-        .then(response => {
-            res.json({
-                response
-            })
-        })
-        .catch(error => {
+// Confirmed games
+const confirmed = (req, res, next) => {
+    Game.find({status: 1}, function (err, games) {
+        if (err) {
             res.json({
                 message: 'Что-то пошло не так!'
             })
+        } else {
+            res.json({
+                games
+            })
+        }
+    })
+}
+
+// Creator games
+const myGames = (req, res) => {
+    Game.count({creator_id: req.user.id}, function (err, total) {
+        if (err) {
+            res.json({
+                message: 'Что-то пошло не так!'
+            })
+        } else {
+            Game.find({creator_id: req.user.id}, function (err, games) {
+                if (err) {
+                    res.json({
+                        message: 'Что-то пошло не так!'
+                    })
+                } else {
+                    res.json({
+                        games,
+                        total
+                    })
+                }
+            })
+        }
+    })
+}
+
+// All games
+const index = (req, res, next) => {
+    Game.count()
+        .then(total => {
+            Game.find()
+                .then(response => {
+                    res.json({
+                        response,
+                        total
+                    })
+                })
+                .catch(error => {
+                    res.json({
+                        message: 'Что-то пошло не так!'
+                    })
+                })
         })
 }
 
@@ -42,21 +88,37 @@ const store = (req, res, next) => {
         owner_id: req.body.owner_id,
     })
 
-    if(req.file){
+    if (req.file) {
         game.file = req.file.path
-    }else{
+    } else {
         res.json({
             message: 'Пожалуйста загрузите файл!'
         })
     }
 
     game.save()
-        .then(user => {
+        .then(game => {
+            if (game.file) {
+                fs.createReadStream(req.file.path).pipe(unzipper.Extract({path: 'games/' + game.slug}))
+
+                // fs.readFile('games/'+game.slug+'/index.html', 'utf8', function (err,data) {
+                //     if (err) {
+                //         return console.log(111, err);
+                //     }
+                //     let result = data.replace(/src="js/g, 'src="http://localhost:4000/games/'+game.slug+'/js');
+                //
+                //     fs.writeFile('games/'+game.slug+'/index.html', result, 'utf8', function (err) {
+                //         if (err) return console.log(222 ,err);
+                //     });
+                //     console.log(9999)
+                // });
+            }
             res.json({
                 message: 'Игра успешно добавлена'
             })
         })
         .catch(error => {
+            console.log(error)
             res.json({
                 message: 'Произошла ошибка!'
             })
@@ -74,12 +136,15 @@ const update = (req, res, next) => {
         owner_id: req.body.owner_id,
     }
 
-    if(req.file){
+    if (req.file) {
         updateData.file = req.file.path
     }
 
     Game.findByIdAndUpdate(gameID, {$set: updateData})
-        .then(() => {
+        .then(game => {
+            if (game.file) {
+                fs.createReadStream(req.file.path).pipe(unzipper.Extract({path: 'games/' + game.slug}))
+            }
             res.json({
                 message: 'Игра успешно обновлена'
             })
@@ -108,10 +173,19 @@ const destroy = (req, res, next) => {
         })
 }
 
+// Get game html
+const getGame = (req, res) => {
+    const filePath = path.join(__dirname + './../games/'+req.query.slug+'/index.html');
+    res.sendFile(filePath);
+}
+
 module.exports = {
+    confirmed,
+    myGames,
     index,
     show,
     store,
     update,
-    destroy
+    destroy,
+    getGame
 }

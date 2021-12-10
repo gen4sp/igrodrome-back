@@ -3,32 +3,43 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
 const register = (req, res, next) => {
-    bcrypt.hash(req.body.password, 10, function (err, hashedPass) {
-        if (err) {
+    User.find({email : req.body.email}, function (err, users) {
+        if (!users.length){
+            bcrypt.hash(req.body.password, 10, function (err, hashedPass) {
+                if (err) {
+                    res.json({
+                        error: err
+                    })
+                }
+
+                let user = new User({
+                    name: req.body.name,
+                    email: req.body.email,
+                    password: hashedPass,
+                    role_id: req.body.role_id
+                })
+
+                user.save()
+                    .then(user => {
+                        res.json({
+                            status: 'success',
+                            message: 'Вы успешно зарегистрировалтсь'
+                        })
+                    })
+                    .catch(error => {
+                        res.json({
+                            status: 'error',
+                            message: 'Произошла ошибка!'
+                        })
+                    })
+            })
+        }else{
             res.json({
-                error: err
+                status: 'error',
+                message: 'Адрес электронной почты уже существует'
             })
         }
-
-        let user = new User({
-            name: req.body.name,
-            email: req.body.email,
-            password: hashedPass,
-            role_id: req.body.role_id
-        })
-
-        user.save()
-            .then(user => {
-                res.json({
-                    message: 'Пользователь успешно добавлен'
-                })
-            })
-            .catch(error => {
-                res.json({
-                    message: 'Произошла ошибка!'
-                })
-            })
-    })
+    });
 }
 
 const login = (req, res, next) => {
@@ -54,17 +65,20 @@ const login = (req, res, next) => {
                             }, process.env.JWT_SECRET_KEY, {expiresIn: '72h'})
 
                         res.json({
+                            status: 'success',
                             message: "Вход выполнен успешно",
                             token
                         })
                     } else {
                         res.json({
+                            status: 'error',
                             message: 'Пароль не соответствует'
                         })
                     }
                 })
             } else {
                 res.json({
+                    status: 'error',
                     message: "Пользователь не найден!"
                 })
             }

@@ -2,22 +2,26 @@ const User = require('../models/User')
 const bcrypt = require('bcryptjs')
 
 // All users
-const index = (req, res, next) => {
-    User.find()
-        .then(response => {
-            res.json({
-                response
-            })
-        })
-        .catch(error => {
-            res.json({
-                message: 'Что-то пошло не так!'
-            })
+const index = (req, res) => {
+    User.count()
+        .then(total => {
+            User.find()
+                .then(response => {
+                    res.json({
+                        response,
+                        total
+                    })
+                })
+                .catch(error => {
+                    res.json({
+                        message: 'Что-то пошло не так!'
+                    })
+                })
         })
 }
 
 // Single user
-const show = (req, res, next) => {
+const show = (req, res) => {
     let userID = req.body.id
 
     User.findById(userID)
@@ -34,25 +38,78 @@ const show = (req, res, next) => {
 }
 
 // Create
-const store = (req, res, next) => {
-    bcrypt.hash(req.body.password, 10, function (err, hashedPass) {
-        if (err) {
+const store = (req, res) => {
+    User.find({email: req.body.email}, function (err, users) {
+        if (!users.length) {
+            bcrypt.hash(req.body.password, 10, function (err, hashedPass) {
+                if (err) {
+                    res.json({
+                        error: err
+                    })
+                }
+
+                let user = new User({
+                    name: req.body.name,
+                    email: req.body.email,
+                    password: hashedPass,
+                    role_id: req.body.role_id
+                })
+
+                user.save()
+                    .then(user => {
+                        res.json({
+                            status: 'success',
+                            message: 'Вы успешно зарегистрировалтсь'
+                        })
+                    })
+                    .catch(error => {
+                        res.json({
+                            status: 'error',
+                            message: 'Произошла ошибка!'
+                        })
+                    })
+            })
+        } else {
             res.json({
-                error: err
+                status: 'error',
+                message: 'Адрес электронной почты уже существует'
             })
         }
+    });
+}
 
-        let user = new User({
+// Update
+const update = (req, res) => {
+    let userID = req.body.id,
+        updateData = {
             name: req.body.name,
             email: req.body.email,
-            password: hashedPass,
             role_id: req.body.role_id
-        })
+        },
+        email = req.body.email
+    User.find({ id: userID }).then(user => {
+        console.log(user)
+        if (user.email !== email) {
+            User.find({email:email}, function (err, users) {
+                console.log(users)
+                if (users.length) {
+                    res.json({
+                        status: 'error',
+                        message: 'Адрес электронной почты уже существует'
+                    })
+                }
+            });
+        }
 
-        user.save()
-            .then(user => {
+        if (req.body.password) {
+            const salt = bcrypt.genSaltSync(10);
+            updateData.password = bcrypt.hashSync(req.body.password, salt)
+        }
+
+        User.findByIdAndUpdate(userID, {$set: updateData})
+            .then(() => {
                 res.json({
-                    message: 'Пользователь успешно добавлен'
+                    message: 'Пользователь успешно обновлен'
                 })
             })
             .catch(error => {
@@ -63,37 +120,8 @@ const store = (req, res, next) => {
     })
 }
 
-// Update
-const update = (req, res, next) => {
-    let userID = req.body.id
-    console.log(userID)
-
-    let updateData = {
-        name: req.body.name,
-        email: req.body.email,
-        role_id: req.body.role_id
-    }
-
-    if(req.body.password){
-        const salt = bcrypt.genSaltSync(10);
-        updateData.password = bcrypt.hashSync(req.body.password, salt)
-    }
-
-    User.findByIdAndUpdate(userID, {$set: updateData})
-        .then(() => {
-            res.json({
-                message: 'Пользователь успешно обновлен'
-            })
-        })
-        .catch(error => {
-            res.json({
-                message: 'Произошла ошибка!'
-            })
-        })
-}
-
 // Delete
-const destroy = (req, res, next) => {
+const destroy = (req, res) => {
     let userID = req.body.id
 
     User.findByIdAndRemove(userID)

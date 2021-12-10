@@ -1,9 +1,16 @@
 const mongoose = require('mongoose')
+const slug = require('mongoose-slug-generator')
 const Schema = mongoose.Schema
+mongoose.plugin(slug)
 
 const gameSchema = new Schema({
     title: {
         type: String
+    },
+    slug: {
+        type: String,
+        slug: "title",
+        unique: true
     },
     status: {
         type: Boolean
