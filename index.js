@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
 const cors = require('cors')
+const path = require('path')
 
 const dotenv = require('dotenv')
 dotenv.config()
@@ -36,3 +37,16 @@ const GameRoute = require('./routes/game')
 app.use('/api', AuthRoute)
 app.use('/api/users', UserRoute)
 app.use('/api/games', GameRoute)
+
+app.use((req, res, next) => {
+    const filePath = path.join(__dirname + '/404.html');
+    return res.sendFile(filePath);
+});
+
+app.use((err, req, res, next) => {
+    return res.status(err.status || 500).json({
+        success: false,
+        message: err.message
+    });
+});
+
