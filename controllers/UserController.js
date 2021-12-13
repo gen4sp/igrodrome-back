@@ -89,11 +89,9 @@ const update = (req, res) => {
             role_id: req.body.role_id
         },
         email = req.body.email
-    User.find({ id: userID }).then(user => {
-        console.log(user)
-        if (user.email !== email) {
-            User.find({email:email}, function (err, users) {
-                console.log(users)
+    User.find({_id: userID}).then(user => {
+        if (user[0].email !== email) {
+            User.find({email}, function (err, users) {
                 if (users.length) {
                     res.json({
                         status: 'error',
