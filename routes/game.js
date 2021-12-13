@@ -14,5 +14,6 @@ router.post('/store', authenticate, role([1, 2]), upload.single('file'), GameCon
 router.post('/update', authenticate, role([1, 2]), upload.single('file'), GameController.update)
 router.post('/delete', authenticate, role([1, 2]), GameController.destroy)
 router.get('/get-game', GameController.getGame)
+router.get('/check-status', GameController.checkStatus)
 
 module.exports = router

@@ -14,6 +14,7 @@ const index = (req, res) => {
                 })
                 .catch(error => {
                     res.json({
+                        status: 'error',
                         message: 'Что-то пошло не так!'
                     })
                 })
@@ -32,6 +33,7 @@ const show = (req, res) => {
         })
         .catch(error => {
             res.json({
+                status: 'error',
                 message: 'Что-то пошло не так!'
             })
         })
@@ -109,11 +111,13 @@ const update = (req, res) => {
         User.findByIdAndUpdate(userID, {$set: updateData})
             .then(() => {
                 res.json({
+                    status: 'success',
                     message: 'Пользователь успешно обновлен'
                 })
             })
             .catch(error => {
                 res.json({
+                    status: 'error',
                     message: 'Произошла ошибка!'
                 })
             })
@@ -127,11 +131,13 @@ const destroy = (req, res) => {
     User.findByIdAndRemove(userID)
         .then(response => {
             res.json({
+                status: 'success',
                 message: 'Пользователь успешно удален'
             })
         })
         .catch(error => {
             res.json({
+                status: 'error',
                 message: 'Что-то пошло не так!'
             })
         })

@@ -8,6 +8,7 @@ const confirmed = (req, res, next) => {
     Game.find({status: 1}, function (err, games) {
         if (err) {
             res.json({
+                status: 'error',
                 message: 'Что-то пошло не так!'
             })
         } else {
@@ -23,12 +24,14 @@ const myGames = (req, res) => {
     Game.count({creator_id: req.user.id}, function (err, total) {
         if (err) {
             res.json({
+                status: 'error',
                 message: 'Что-то пошло не так!'
             })
         } else {
             Game.find({creator_id: req.user.id}, function (err, games) {
                 if (err) {
                     res.json({
+                        status: 'error',
                         message: 'Что-то пошло не так!'
                     })
                 } else {
@@ -55,6 +58,7 @@ const index = (req, res, next) => {
                 })
                 .catch(error => {
                     res.json({
+                        status: 'error',
                         message: 'Что-то пошло не так!'
                     })
                 })
@@ -73,6 +77,7 @@ const show = (req, res, next) => {
         })
         .catch(error => {
             res.json({
+                status: 'error',
                 message: 'Что-то пошло не так!'
             })
         })
@@ -83,7 +88,7 @@ const store = (req, res, next) => {
 
     let game = new Game({
         title: req.body.title,
-        status: req.body.status,
+        status: req.body.status === 'true',
         creator_id: req.body.creator_id,
         owner_id: req.body.owner_id,
     })
@@ -92,8 +97,10 @@ const store = (req, res, next) => {
         game.file = req.file.path
     } else {
         res.json({
+            status: 'error',
             message: 'Пожалуйста загрузите файл!'
         })
+        return
     }
 
     game.save()
@@ -114,12 +121,14 @@ const store = (req, res, next) => {
                 // });
             }
             res.json({
+                status: 'success',
                 message: 'Игра успешно добавлена'
             })
         })
         .catch(error => {
             console.log(error)
             res.json({
+                status: 'error',
                 message: 'Произошла ошибка!'
             })
         })
@@ -127,33 +136,34 @@ const store = (req, res, next) => {
 
 // Update
 const update = (req, res, next) => {
-    let gameID = req.body.id
-
-    let updateData = {
-        title: req.body.title,
-        status: req.body.status,
-        creator_id: req.body.creator_id,
-        owner_id: req.body.owner_id,
-    }
+    let gameID = req.body.id,
+        updateData = {
+            title: req.body.title,
+            status: req.body.status === 'true',
+            creator_id: req.body.creator_id,
+            owner_id: req.body.owner_id,
+        }
 
     if (req.file) {
         updateData.file = req.file.path
     }
 
-    Game.findByIdAndUpdate(gameID, {$set: updateData})
-        .then(game => {
-            if (game.file) {
+    Game.findByIdAndUpdate(gameID, {$set: updateData},{upsert: true, new: true}, function (err, game) {
+        if (err) {
+            res.json({
+                status: 'error',
+                message: 'Произошла ошибка!'
+            })
+        } else {
+            if (req.file) {
                 fs.createReadStream(req.file.path).pipe(unzipper.Extract({path: 'games/' + game.slug}))
             }
             res.json({
+                status: 'success',
                 message: 'Игра успешно обновлена'
             })
-        })
-        .catch(error => {
-            res.json({
-                message: 'Произошла ошибка!'
-            })
-        })
+        }
+    })
 }
 
 // Delete
@@ -175,8 +185,24 @@ const destroy = (req, res, next) => {
 
 // Get game html
 const getGame = (req, res) => {
-    const filePath = path.join(__dirname + './../games/'+req.query.slug+'/index.html');
+    const filePath = path.join(__dirname + './../games/' + req.query.slug + '/index.html');
     res.sendFile(filePath);
+}
+
+// Check status
+const checkStatus = (req, res) => {
+    Game.find({slug: req.query.slug}, function (err, game) {
+        if (err) {
+            res.json({
+                status: 'error',
+                message: 'Что-то пошло не так!'
+            })
+        } else {
+            res.json({
+                game
+            })
+        }
+    })
 }
 
 module.exports = {
@@ -187,5 +213,6 @@ module.exports = {
     store,
     update,
     destroy,
-    getGame
+    getGame,
+    checkStatus
 }
