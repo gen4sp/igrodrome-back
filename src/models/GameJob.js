@@ -1,10 +1,11 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+import mongoose from 'mongoose'
 
 export const CREATED = 'CREATED'
 export const FETCHING = 'FETCHING'
 export const FETCHED = 'FETCHED'
 export const INTERRUPTED = 'INTERRUPTED'
+
+const Schema = mongoose.Schema
 
 const gameJobSchema = new Schema(
   {
@@ -18,6 +19,4 @@ const gameJobSchema = new Schema(
   { timestamps: true }
 )
 
-const GameJob = mongoose.model('GameJob', gameJobSchema)
-
-module.exports = GameJob
+export default mongoose.model('GameJob', gameJobSchema)

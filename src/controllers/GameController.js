@@ -1,7 +1,9 @@
 const Game = require('../models/Game')
 const fs = require('fs')
 const path = require('path')
-const unzipper = require('unzipper')
+const queue = require('../queue')
+
+// const unzipper = require('unzipper')
 
 // Confirmed games
 const confirmed = (req, res, next) => {
@@ -157,9 +159,9 @@ const update = (req, res, next) => {
         message: 'Произошла ошибка!'
       })
     } else {
-      if (req.file) {
-        fs.createReadStream(req.file.path).pipe(unzipper.Extract({ path: 'games/' + game.slug }))
-      }
+      // if (req.file) {
+      //   fs.createReadStream(req.file.path).pipe(unzipper.Extract({ path: 'games/' + game.slug }))
+      // }
       res.json({
         status: 'success',
         message: 'Игра успешно обновлена'

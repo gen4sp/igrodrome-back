@@ -26,7 +26,7 @@ const FirebaseStorage = require('multer-firebase-storage')
 let upload = multer({
   storage: FirebaseStorage({
     bucketName: 'gs://manitou-alfa-v1.appspot.com',
-    credentials: require('../firebase-service-key.json'),
+    credentials: require('../../firebase-service-key.json'),
     // directoryPath: 'games',
     unique: true
   }),

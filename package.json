@@ -4,11 +4,12 @@
   "description": "Игродром",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "dev": "backpack"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "backpack-core": "^0.8.4",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
@@ -16,12 +17,12 @@
     "express": "^4.17.1",
     "firebase-admin": "^10.0.1",
     "jsonwebtoken": "^8.5.1",
+    "mongo-queue": "^1.0.0",
     "mongoose": "^6.0.13",
     "mongoose-slug-generator": "^1.0.4",
     "morgan": "^1.10.0",
     "multer": "^1.4.3",
     "multer-firebase-storage": "^2.0.0",
-    "nodemon": "^2.0.15",
     "unzipper": "^0.10.11"
   }
 }
