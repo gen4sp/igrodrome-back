@@ -7,7 +7,10 @@ const path = require('path')
 const dotenv = require('dotenv')
 dotenv.config()
 
-mongoose.connect(process.env.DB, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
 const db = mongoose.connection
 
 db.on('error', err => {
