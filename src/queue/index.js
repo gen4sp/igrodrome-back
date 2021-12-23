@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import queue from 'mongo-queue'
-import GameJob from '../models/GameJob'
+import GameState from '../models/GameState'
 
 const db = new queue.Connection({
   host: process.env.DB_HOST,
@@ -17,19 +17,19 @@ db.on('connected', () => {
 })
 
 export default {
-  createGameJob(gameId) {
-    const gameJob = new GameJob({
+  runGameJob(gameId) {
+    const gameState = new GameState({
       game_id: gameId
     })
-    return gameJob.save().then(gameJob => {
+    return gameState.save().then(gameState => {
       return new Promise((resolve, reject) => {
-        db.enqueue('GameJob', gameJob._id, err => {
+        db.enqueue('GameJob', gameState._id, err => {
           if (err) {
             reject(err)
             return
           }
-          /***/ console.log(`Queue job added`)
-          resolve(gameJob)
+          /***/ console.log(`Game job added to queue`)
+          resolve(gameState)
         })
       })
     })

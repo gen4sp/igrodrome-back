@@ -7,16 +7,15 @@ export const INTERRUPTED = 'INTERRUPTED'
 
 const Schema = mongoose.Schema
 
-const gameJobSchema = new Schema(
+const gameStateSchema = new Schema(
   {
     game_id: { type: Schema.Types.ObjectId, ref: 'Game' },
     state: { type: String, enum: [CREATED, FETCHING, FETCHED, INTERRUPTED], default: CREATED },
     state_history: [{ type: String }],
     log: [{ type: String }],
-    error: { type: String, default: null },
-    interrupt: { type: Boolean, default: false }
+    error: { type: String, default: null }
   },
   { timestamps: true }
 )
 
-export default mongoose.model('GameJob', gameJobSchema)
+export default mongoose.model('GameState', gameStateSchema)
