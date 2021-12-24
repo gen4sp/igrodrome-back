@@ -106,21 +106,6 @@ const store = (req, res, next) => {
   game
     .save()
     .then(game => {
-      //       if (game.file) {
-      //         fs.createReadStream(req.file.path).pipe(unzipper.Extract({ path: 'games/' + game.slug }))
-      //
-      //         // fs.readFile('games/'+game.slug+'/index.html', 'utf8', function (err,data) {
-      //         //     if (err) {
-      //         //         return console.log(111, err);
-      //         //     }
-      //         //     let result = data.replace(/src="js/g, 'src="http://localhost:4000/games/'+game.slug+'/js');
-      //         //
-      //         //     fs.writeFile('games/'+game.slug+'/index.html', result, 'utf8', function (err) {
-      //         //         if (err) return console.log(222 ,err);
-      //         //     });
-      //         //     console.log(9999)
-      //         // });
-      //       }
       res.json({
         status: 'success',
         message: 'Игра успешно добавлена'
@@ -140,7 +125,6 @@ const update = (req, res, next) => {
   let gameID = req.body.id,
     updateData = {
       title: req.body.title,
-      status: req.body.status === 'true',
       creator_id: req.body.creator_id,
       owner_id: req.body.owner_id
     }
@@ -187,6 +171,41 @@ const destroy = (req, res, next) => {
     })
 }
 
+const build = (req, res, next) => {
+  queue.default
+    .runGameBuild(req.params.id)
+    .then(() => {
+      res.json({
+        status: 'success'
+      })
+    })
+    .catch(err => {
+      /***/ console.log(err)
+      res.json({
+        status: 'error',
+        message: err
+      })
+    })
+}
+
+const getGameState = (req, res, next) => {
+  Game.findById(req.params.id)
+    .populate('state', 'status log error')
+    .lean()
+    .then(game => {
+      res.json({
+        status: 'success',
+        game
+      })
+    })
+    .catch(err => {
+      /***/ console.log(err)
+      res.json({
+        status: 'error'
+      })
+    })
+}
+
 // Get game html
 const getGame = (req, res) => {
   const filePath = path.join(__dirname + './../games/' + req.query.slug + '/index.html')
@@ -217,6 +236,8 @@ module.exports = {
   store,
   update,
   destroy,
+  build,
+  getGameState,
   getGame,
   checkStatus
 }

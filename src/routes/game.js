@@ -7,7 +7,7 @@ const authenticate = require('../middleware/authenticate')
 const upload = require('../middleware/upload')
 
 router.get('/confirmed', GameController.confirmed)
-router.get('/my-games',  authenticate, role([2]),GameController.myGames)
+router.get('/my-games', authenticate, role([2]), GameController.myGames)
 router.get('/', authenticate, role([1]), GameController.index)
 router.post('/show', authenticate, role([1, 2]), GameController.show)
 router.post('/store', authenticate, role([1, 2]), upload.single('file'), GameController.store)
@@ -15,5 +15,8 @@ router.post('/update', authenticate, role([1, 2]), upload.single('file'), GameCo
 router.post('/delete', authenticate, role([1, 2]), GameController.destroy)
 router.get('/get-game', GameController.getGame)
 router.get('/check-status', GameController.checkStatus)
+
+router.post('/:id/build', authenticate, role([1, 2]), GameController.build)
+router.get('/:id/state', authenticate, role([1, 2]), GameController.getGameState)
 
 module.exports = router
