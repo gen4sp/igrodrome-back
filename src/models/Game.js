@@ -12,6 +12,9 @@ const gameSchema = new Schema(
     owner_id: { type: String },
     creator_id: { type: String },
     data: { type: String },
+    source_type: { type: String, enum: ['file', 'github'], default: 'github' },
+    github_repo: { type: String },
+    github_branch: { type: String },
     file: { type: String }
   },
   { timestamps: true }

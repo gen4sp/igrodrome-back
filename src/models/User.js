@@ -7,7 +7,7 @@ const userSchema = new Schema(
     email: { type: String },
     password: { type: String, select: false },
     role_id: { type: Number, required: true, default: 3 },
-    github_id: { type: 'String', select: false },
+    github_id: { type: 'String' },
     github_access_token: { type: 'String', select: false }
   },
   { timestamps: true }

@@ -8,6 +8,7 @@ router.post('/register', AuthController.register)
 router.post('/login', AuthController.login)
 router.post('/logout', authenticate, AuthController.logout)
 router.get('/details', authenticate, AuthController.user)
-router.post('/oauth', AuthController.oAuthLogin)
+router.post('/oauth', AuthController.oAuthConnect)
+router.put('/oauth', authenticate, AuthController.oAuthConnect)
 
 module.exports = router

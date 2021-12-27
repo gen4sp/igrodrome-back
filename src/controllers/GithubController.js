@@ -1,37 +1,47 @@
-import github from 'octonode'
+import githubApi from '../utils/githubApi'
+import User from '../models/User'
 
-github.auth.config({
-  id: process.env.GITHUB_CLIENT_ID,
-  secret: process.env.GITHUB_CLIENT_SECRET
-})
-
-const auth = code => {
-  return new Promise((resolve, reject) => {
-    github.auth.login(code, function(err, token) {
-      if (err) {
-        /***/ console.log(err)
-        reject(err)
-        return
-      }
-      resolve(token)
+const getRepositories = (req, res) => {
+  return User.findOne({ _id: req.user.id })
+    .select('+github_access_token')
+    .lean()
+    .then(user => {
+      return githubApi.repos(user.github_access_token)
     })
-  })
+    .then(list => {
+      res.json({
+        list
+      })
+    })
+    .catch(err => {
+      /***/ console.log(err)
+      res.json({
+        status: 'error'
+      })
+    })
 }
 
-const getUserInfo = accessToken => {
-  const client = github.client(accessToken)
-  return new Promise((resolve, reject) => {
-    client.get('/user', {}, function(err, status, data) {
-      if (err) {
-        reject(err)
-        return
-      }
-      resolve(data)
+const getRepositoryBranches = (req, res) => {
+  return User.findOne({ _id: req.user.id })
+    .select('+github_access_token')
+    .lean()
+    .then(user => {
+      return githubApi.branches(user.github_access_token, req.query.repo)
     })
-  })
+    .then(list => {
+      res.json({
+        list
+      })
+    })
+    .catch(err => {
+      /***/ console.log(err)
+      res.json({
+        status: 'error'
+      })
+    })
 }
 
 export default {
-  auth,
-  getUserInfo
+  getRepositories,
+  getRepositoryBranches
 }

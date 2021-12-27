@@ -1,7 +1,7 @@
 const User = require('../models/User')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const GithubController = require('./GithubController')
+const githubApi = require('../utils/githubApi')
 
 const register = (req, res, next) => {
   User.find({ email: req.body.email }, function(err, users) {
@@ -48,38 +48,40 @@ const login = (req, res, next) => {
   let email = req.body.email,
     password = req.body.password
 
-  User.findOne({ $or: [{ email }] }).then(user => {
-    if (user) {
-      bcrypt.compare(password, user.password, function(err, result) {
-        if (err) {
-          res.json({
-            error: err
-          })
-        }
+  User.findOne({ $or: [{ email }] })
+    .select('+password')
+    .then(user => {
+      if (user) {
+        bcrypt.compare(password, user.password, function(err, result) {
+          if (err) {
+            return res.json({
+              error: err
+            })
+          }
 
-        if (result) {
-          res.json({
-            status: 'success',
-            message: 'Вход выполнен успешно',
-            token: getAccessToken(user)
-          })
-        } else {
-          res.json({
-            status: 'error',
-            message: 'Пароль не соответствует'
-          })
-        }
-      })
-    } else {
-      res.json({
-        status: 'error',
-        message: 'Пользователь не найден!'
-      })
-    }
-  })
+          if (result) {
+            res.json({
+              status: 'success',
+              message: 'Вход выполнен успешно',
+              token: getAccessToken(user)
+            })
+          } else {
+            res.json({
+              status: 'error',
+              message: 'Пароль не соответствует'
+            })
+          }
+        })
+      } else {
+        res.json({
+          status: 'error',
+          message: 'Пользователь не найден!'
+        })
+      }
+    })
 }
 
-const oAuthLogin = (req, res, next) => {
+const oAuthConnect = (req, res, next) => {
   const providers = ['github']
   const { provider, code } = req.body
 
@@ -101,36 +103,55 @@ const oAuthLogin = (req, res, next) => {
     let accessToken
     let userInfo
     let user
-    GithubController.default
+    githubApi.default
       .auth(code)
       .then(token => {
         accessToken = token
-        return GithubController.default.getUserInfo(accessToken)
+        return githubApi.default.userInfo(accessToken)
       })
       .then(data => {
         userInfo = data
-        return User.findOne({ github_id: userInfo.id }).lean()
-      })
-      .then(userFindResult => {
-        if (!userFindResult) {
-          user = new User({
-            name: userInfo.login,
-            github_id: userInfo.id,
-            github_access_token: accessToken,
-            role_id: req.body.role_id
-          })
-          return user.save()
-        }
-        user = userFindResult
       })
       .then(() => {
-        console.log(user)
-
-        return res.json({
-          status: 'success',
-          message: 'Вход выполнен успешно',
-          token: getAccessToken(user)
-        })
+        if (req.user) {
+          // just connect to exists account
+          return User.updateOne(
+            { _id: req.user.id },
+            {
+              github_id: userInfo.id,
+              github_access_token: accessToken
+            }
+          )
+        } else {
+          // create account for new github_id
+          return User.findOne({ github_id: userInfo.id })
+            .lean()
+            .then(userFindResult => {
+              if (!userFindResult) {
+                user = new User({
+                  name: userInfo.login,
+                  github_id: userInfo.id,
+                  github_access_token: accessToken,
+                  role_id: req.body.role_id
+                })
+                return user.save()
+              }
+              user = userFindResult
+            })
+        }
+      })
+      .then(() => {
+        if (req.user) {
+          return res.json({
+            status: 'success'
+          })
+        } else {
+          return res.json({
+            status: 'success',
+            message: 'Вход выполнен успешно',
+            token: getAccessToken(user)
+          })
+        }
       })
       .catch(err => {
         res.json({
@@ -152,7 +173,10 @@ const user = (req, res, next) => {
     .lean()
     .then(user => {
       res.json({
-        user
+        user: {
+          id: user._id,
+          ...user
+        }
       })
     })
 }
@@ -169,5 +193,5 @@ module.exports = {
   logout,
   user,
   getAccessToken,
-  oAuthLogin
+  oAuthConnect
 }

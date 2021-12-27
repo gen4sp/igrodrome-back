@@ -35,10 +35,12 @@ app.listen(PORT, () => {})
 const AuthRoute = require('./routes/auth')
 const UserRoute = require('./routes/user')
 const GameRoute = require('./routes/game')
+const GithubRoute = require('./routes/github')
 
 app.use('/api', AuthRoute)
 app.use('/api/users', UserRoute)
 app.use('/api/games', GameRoute)
+app.use('/api/github', GithubRoute)
 
 app.use((req, res, next) => {
   const filePath = path.join(__dirname + '/404.html')

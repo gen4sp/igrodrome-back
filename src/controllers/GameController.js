@@ -3,8 +3,6 @@ const fs = require('fs')
 const path = require('path')
 const queue = require('../queue')
 
-// const unzipper = require('unzipper')
-
 // Confirmed games
 const confirmed = (req, res, next) => {
   Game.find({ status: 1 }, function(err, games) {
@@ -23,7 +21,11 @@ const confirmed = (req, res, next) => {
 
 // Creator games
 const myGames = (req, res) => {
+  console.log(req.user.id)
+
   Game.count({ creator_id: req.user.id }, function(err, total) {
+    console.log(total)
+
     if (err) {
       res.json({
         status: 'error',
@@ -89,18 +91,23 @@ const store = (req, res, next) => {
   let game = new Game({
     title: req.body.title,
     status: req.body.status === 'true',
+    source_type: req.body.source_type,
+    github_repo: req.body.github_repo,
+    github_branch: req.body.github_branch,
     creator_id: req.body.creator_id,
     owner_id: req.body.owner_id
   })
 
-  if (req.file) {
-    game.file = req.file.path
-  } else {
-    res.json({
-      status: 'error',
-      message: 'Пожалуйста загрузите файл!'
-    })
-    return
+  if (req.body.source_type === 'file') {
+    if (req.file) {
+      game.file = req.file.path
+    } else {
+      res.json({
+        status: 'error',
+        message: 'Пожалуйста загрузите файл!'
+      })
+      return
+    }
   }
 
   game
