@@ -23,6 +23,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.3",
     "multer-firebase-storage": "^2.0.0",
+    "octonode": "^0.10.2",
     "unzipper": "^0.10.11"
   }
 }
