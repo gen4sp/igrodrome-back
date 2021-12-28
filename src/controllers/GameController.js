@@ -90,8 +90,8 @@ const store = (req, res, next) => {
     source_type: req.body.source_type,
     github_repo: req.body.github_repo,
     github_branch: req.body.github_branch,
-    creator: req.body.creator,
-    owner: req.body.owner
+    creator: req.user.id,
+    owner: req.user.id
   })
 
   if (req.body.source_type === 'file') {
@@ -128,8 +128,9 @@ const update = (req, res, next) => {
   let gameID = req.body.id,
     updateData = {
       title: req.body.title,
-      creator: req.body.creator,
-      owner: req.body.owner
+      source_type: req.body.source_type,
+      github_repo: req.body.github_repo,
+      github_branch: req.body.github_branch
     }
 
   if (req.file) {
@@ -146,9 +147,6 @@ const update = (req, res, next) => {
         message: 'Произошла ошибка!'
       })
     } else {
-      // if (req.file) {
-      //   fs.createReadStream(req.file.path).pipe(unzipper.Extract({ path: 'games/' + game.slug }))
-      // }
       res.json({
         status: 'success',
         message: 'Игра успешно обновлена'
