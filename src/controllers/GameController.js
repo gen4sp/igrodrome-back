@@ -21,18 +21,14 @@ const confirmed = (req, res, next) => {
 
 // Creator games
 const myGames = (req, res) => {
-  console.log(req.user.id)
-
-  Game.count({ creator_id: req.user.id }, function(err, total) {
-    console.log(total)
-
+  Game.count({ creator: req.user.id }, function(err, total) {
     if (err) {
       res.json({
         status: 'error',
         message: 'Что-то пошло не так!'
       })
     } else {
-      Game.find({ creator_id: req.user.id }, function(err, games) {
+      Game.find({ creator: req.user.id }, function(err, games) {
         if (err) {
           res.json({
             status: 'error',
@@ -94,8 +90,8 @@ const store = (req, res, next) => {
     source_type: req.body.source_type,
     github_repo: req.body.github_repo,
     github_branch: req.body.github_branch,
-    creator_id: req.body.creator_id,
-    owner_id: req.body.owner_id
+    creator: req.body.creator,
+    owner: req.body.owner
   })
 
   if (req.body.source_type === 'file') {
@@ -132,8 +128,8 @@ const update = (req, res, next) => {
   let gameID = req.body.id,
     updateData = {
       title: req.body.title,
-      creator_id: req.body.creator_id,
-      owner_id: req.body.owner_id
+      creator: req.body.creator,
+      owner: req.body.owner
     }
 
   if (req.file) {
