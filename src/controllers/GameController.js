@@ -90,6 +90,8 @@ const store = (req, res, next) => {
     source_type: req.body.source_type,
     github_repo: req.body.github_repo,
     github_branch: req.body.github_branch,
+    packet_manager: req.body.packet_manager,
+    build_cmd: req.body.build_cmd,
     creator: req.user.id,
     owner: req.user.id
   })
@@ -130,7 +132,9 @@ const update = (req, res, next) => {
       title: req.body.title,
       source_type: req.body.source_type,
       github_repo: req.body.github_repo,
-      github_branch: req.body.github_branch
+      github_branch: req.body.github_branch,
+      packet_manager: req.body.packet_manager,
+      build_cmd: req.body.build_cmd
     }
 
   if (req.file) {

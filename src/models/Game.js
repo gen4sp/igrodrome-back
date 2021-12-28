@@ -15,7 +15,9 @@ const gameSchema = new Schema(
     source_type: { type: String, enum: ['file', 'github'], default: 'github' },
     github_repo: { type: String },
     github_branch: { type: String },
-    file: { type: String }
+    file: { type: String },
+    packet_manager: { type: String, enum: ['npm', 'yarn'], default: 'yarn' },
+    build_cmd: { type: String, default: 'build' }
   },
   { timestamps: true }
 )
